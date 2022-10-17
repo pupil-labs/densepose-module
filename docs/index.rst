@@ -7,7 +7,7 @@ Welcome to |project| documentation!
    history
 
 
-.. automodule:: skeleton
+.. automodule:: dense_pose
     :members:
     :undoc-members:
     :show-inheritance:
