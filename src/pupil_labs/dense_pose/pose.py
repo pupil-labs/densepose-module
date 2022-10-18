@@ -78,7 +78,7 @@ class PartsDefinition(Enum):
     HEAD_LEFT = 24
 
 
-def setup_config(min_score=0.7):
+def setup_config(min_score=0.7, device="cuda"):
     logging.info("Loading config...")
     weights = "https://dl.fbaipublicfiles.com/densepose/densepose_rcnn_R_50_FPN_DL_s1x/165712097/model_final_0ed407.pkl"
     opts = []
@@ -94,7 +94,7 @@ def setup_config(min_score=0.7):
     logging.info(f"Loading model from {weights}")
     cfg.MODEL.WEIGHTS = weights
 
-    cfg.MODEL.DEVICE = "cpu"
+    cfg.MODEL.DEVICE = device
     cfg.freeze()
     predictor = DefaultPredictor(cfg)
 

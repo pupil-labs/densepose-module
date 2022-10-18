@@ -43,6 +43,7 @@ def main():
         "--model", default="DensePose_ResNet101_FPN_s1x-e2e.pkl", type=str
     )
     parser.add_argument("--confidence", default=0.7, type=float)
+    parser.add_argument("--device", default="cuda", type=str)
     parser.add_argument("--output_file", default=None, type=str)
     parser.add_argument("--vis", default=False, type=bool)
 
@@ -162,7 +163,9 @@ def main():
         logging.info(f"Output path: {args.output_file}")
 
     # Get the model ready
-    predictor, visualizer, extractor, cfg = pose.setup_config()
+    predictor, visualizer, extractor, cfg = pose.setup_config(
+        args.confidence, args.device
+    )
 
     # Here we go!
     with av.open(video_path) as video, av.open(video_path) as audio, av.open(
