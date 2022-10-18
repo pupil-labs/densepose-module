@@ -3,7 +3,7 @@
 from importlib.metadata import PackageNotFoundError, version
 
 try:
-    __version__ = version("pupil_labs_dense_pose")
+    __version__ = version("pupil-labs-dense-pose")
 except PackageNotFoundError:
     # package is not installed
     pass
