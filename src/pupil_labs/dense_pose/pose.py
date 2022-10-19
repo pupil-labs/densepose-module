@@ -171,8 +171,8 @@ def get_densepose(
                 # Labels on a person found bounding box
                 labels_bb = result["pred_densepose"][i].labels.cpu().numpy()
                 # Gaze point relative to the bounding box
-                x = int(xy[0] - box[0])
-                y = int(xy[1] - box[1])
+                x = int(np.floor(xy[0] - box[0]))
+                y = int(np.floor(xy[1] - box[1]))
                 id_part.append(labels_bb[y, x])
             else:
                 id_part.append(0)
