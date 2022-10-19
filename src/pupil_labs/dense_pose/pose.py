@@ -173,6 +173,8 @@ def get_densepose(
                 # Gaze point relative to the bounding box
                 x = int(np.floor(xy[0] - box[0]))
                 y = int(np.floor(xy[1] - box[1]))
+                x = x - 1 if x != 0 else x
+                y = y - 1 if y != 0 else y
                 id_part.append(labels_bb[y, x])
             else:
                 id_part.append(0)
