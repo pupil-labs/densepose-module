@@ -206,10 +206,10 @@ def main():
             xy = row[["gaze x [px]", "gaze y [px]"]].to_numpy(dtype=np.int32)
 
             # Get the densepose data
-            if args.inference:
+            if args.inference and num_processed_frames == 0:
                 import torch
 
-                if torch.cuda.is_available() and num_processed_frames == 0:
+                if torch.cuda.is_available():
                     logging.info("Creating logger for inference times")
                     starter, ender = torch.cuda.Event(
                         enable_timing=True
@@ -220,7 +220,7 @@ def main():
                     error = "CUDA not available, disable inference with --no-inference"
                     logging.error(error)
                     raise Exception(error)
-            else:
+            elif not args.inference and num_processed_frames == 0:
                 starter, ender, timings = None, None, None
 
             frame, _, id_name, starter, ender, timings = pose.get_densepose(
