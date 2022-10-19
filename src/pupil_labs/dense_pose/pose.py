@@ -131,13 +131,13 @@ def get_densepose(
     xy,
     starter=None,
     ender=None,
-    timings=None,
+    timings=0,
     frameid=0,
     labels_onimg=True,
 ):
     with torch.no_grad():
         # Let the GPU WARM UP and measure inference time after 60 frames
-        if 60 < frameid < (len(timings) + 60) and starter is not None:
+        if starter is not None and 60 < frameid < (len(timings) + 60):
             starter.record()
             outputs = predictor(frame)["instances"]
             ender.record()
@@ -168,14 +168,21 @@ def get_densepose(
     if xy is not None and len(result["pred_boxes_XYXY"]) > 0:
         for i, box in enumerate(result["pred_boxes_XYXY"]):
             if xy[0] > box[0] and xy[0] < box[2] and xy[1] > box[1] and xy[1] < box[3]:
-                id_part.append(int(result["pred_densepose"][i].labels.max().numpy()))
+                # Labels on a person found bounding box
+                labels_bb = result["pred_densepose"][i].labels.cpu().numpy()
+                # Gaze point relative to the bounding box
+                x = int(xy[0] - box[0])
+                y = int(xy[1] - box[1])
+                id_part.append(labels_bb[y, x])
             else:
                 id_part.append(0)
     else:
         id_part.append(0)
+    frame = (frame * 255).astype(np.uint8)
     frame_vis = visualizer.visualize(frame, data)
 
     # Get id name of the body part gazed at
+    # Get unique ids
     id_part = list(set(id_part))
     id_name = []
     for i in range(len(id_part)):

@@ -44,15 +44,15 @@ def main():
         "--model", default="DensePose_ResNet101_FPN_s1x-e2e.pkl", type=str
     )
     parser.add_argument("--confidence", default=0.7, type=float)
-    parser.add_argument("--device", default="cuda", type=str)
+    parser.add_argument("--device", default="cpu", type=str)
 
     parser.add_argument("--vis", action="store_true")
     parser.add_argument("--no-vis", dest="vis", action="store_false")
-    parser.set_defaults(vis=False)
+    parser.set_defaults(vis=True)
 
     parser.add_argument("--inference", action="store_true")
     parser.add_argument("--no-inference", dest="inference", action="store_false")
-    parser.set_defaults(inference=True)
+    parser.set_defaults(inference=False)
 
     args = parser.parse_args()
 
