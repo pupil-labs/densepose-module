@@ -5,7 +5,6 @@ from enum import Enum
 from typing import Dict, Type
 
 import cv2
-import densepose
 import numpy as np
 import torch
 from densepose import add_densepose_config
@@ -13,13 +12,11 @@ from densepose.structures import (
     DensePoseChartPredictorOutput,
     DensePoseEmbeddingPredictorOutput,
 )
-from densepose.utils.logger import verbosity_to_level
 from densepose.vis.base import CompoundVisualizer
 from densepose.vis.bounding_box import ScoredBoundingBoxVisualizer
 from densepose.vis.densepose_outputs_vertex import (
     DensePoseOutputsTextureVisualizer,
     DensePoseOutputsVertexVisualizer,
-    get_texture_atlases,
 )
 from densepose.vis.densepose_results import (
     DensePoseResultsContourVisualizer,
@@ -29,7 +26,6 @@ from densepose.vis.densepose_results import (
 )
 from densepose.vis.densepose_results_textures import (
     DensePoseResultsVisualizerWithTexture,
-    get_texture_atlas,
 )
 from densepose.vis.extractor import (
     CompoundExtractor,
@@ -37,9 +33,8 @@ from densepose.vis.extractor import (
     DensePoseResultExtractor,
     create_extractor,
 )
-from detectron2.config import CfgNode, get_cfg
+from detectron2.config import get_cfg
 from detectron2.engine.defaults import DefaultPredictor
-from detectron2.structures.instances import Instances
 
 # Set my own logger
 logger = logging.getLogger("pl-densepose-pose")
@@ -86,6 +81,8 @@ def setup_config(min_score=0.7, device="cuda"):
     opts.append(min_score)
     cfg = get_cfg()
     add_densepose_config(cfg)
+
+    # Find the config file in the folder and load it
     dir = os.path.dirname(__file__)
     config_file = glob.glob(os.path.join(dir, "config", "[!Base_]*.yaml"))[0]
     cfg.merge_from_file(config_file)
@@ -122,15 +119,32 @@ def setup_config(min_score=0.7, device="cuda"):
     context = {"extractor": extractor, "visualizer": visualizer}
     visualizer = context["visualizer"]
     extractor = context["extractor"]
-
     return predictor, visualizer, extractor, cfg
 
 
 def get_densepose(
-    frame, predictor, visualizer, extractor, cfg, xy, frameid=0, labels_onimg=True
+    frame,
+    predictor,
+    visualizer,
+    extractor,
+    cfg,
+    xy,
+    starter=None,
+    ender=None,
+    timings=None,
+    frameid=0,
+    labels_onimg=True,
 ):
     with torch.no_grad():
-        outputs = predictor(frame)["instances"]
+        # Let the GPU WARM UP and measure inference time after 60 frames
+        if 60 < frameid < (len(timings) + 60) and starter is not None:
+            starter.record()
+            outputs = predictor(frame)["instances"]
+            ender.record()
+            torch.cuda.synchronize()
+            timings[frameid - 60] = starter.elapsed_time(ender)
+        else:
+            outputs = predictor(frame)["instances"]
     result = {}
     extractor_r = extractor
     if outputs.has("scores"):
@@ -160,7 +174,8 @@ def get_densepose(
     else:
         id_part.append(0)
     frame_vis = visualizer.visualize(frame, data)
-    # Get id name
+
+    # Get id name of the body part gazed at
     id_part = list(set(id_part))
     id_name = []
     for i in range(len(id_part)):
@@ -169,7 +184,7 @@ def get_densepose(
     text_id_name = ", ".join(id_name)
     logging.debug(f"DensePose frame {frameid} - looking at part {text_id_name}")
 
-    # write part in the bottom left corner of the image
+    # write body part in the bottom left corner of the image
     if labels_onimg:
         cv2.putText(
             frame_vis,
@@ -181,4 +196,4 @@ def get_densepose(
             lineType=1,
         )
 
-    return frame_vis, result, text_id_name
+    return frame_vis, result, text_id_name, starter, ender, timings

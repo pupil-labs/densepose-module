@@ -33,6 +33,7 @@ logging.getLogger("libav.swscaler").setLevel(logging.ERROR)
 
 # Main call function
 def main():
+
     # Parse arguments
     parser = argparse.ArgumentParser(description="Pupil Labs - Dense Pose")
     parser.add_argument("--input_path", default=None, type=str)
@@ -44,11 +45,18 @@ def main():
     )
     parser.add_argument("--confidence", default=0.7, type=float)
     parser.add_argument("--device", default="cuda", type=str)
-    parser.add_argument("--output_file", default=None, type=str)
-    parser.add_argument("--vis", default=False, type=bool)
+
+    parser.add_argument("--vis", action="store_true")
+    parser.add_argument("--no-vis", dest="vis", action="store_false")
+    parser.set_defaults(vis=False)
+
+    parser.add_argument("--inference", action="store_true")
+    parser.add_argument("--no-inference", dest="inference", action="store_false")
+    parser.set_defaults(inference=True)
 
     args = parser.parse_args()
 
+    logging.info(f"Arguments: {args}")
     if args.input_path is None:
         args.input_path = get_path(
             "Select the video folder in the raw directory", "world_timestamps.csv", None
@@ -64,9 +72,6 @@ def main():
     )
     events_df = pd.read_csv(os.path.join(args.input_path, "events.csv"), dtype=oftype)
     gaze_df = pd.read_csv(os.path.join(args.input_path, "gaze.csv"), dtype=oftype)
-    fixations_df = pd.read_csv(
-        os.path.join(args.input_path, "fixations.csv"), dtype=oftype
-    )
 
     files = glob.glob(os.path.join(args.input_path, "*.mp4"))
     if len(files) != 1:
@@ -155,12 +160,15 @@ def main():
     num_processed_frames = 0
 
     # Get the output path
-    if args.output_file is None:
+    if args.output_path is None:
         args.output_file = get_savedir(None, type="video")
         args.out_csv = args.output_file.replace(
             os.path.split(args.output_file)[1], "densepose.csv"
         )
-        logging.info(f"Output path: {args.output_file}")
+    else:
+        args.output_file = os.path.join(args.output_path, "densepose.mp4")
+        args.out_csv = os.path.join(args.output_path, "densepose.csv")
+    logging.info(f"Output path: {args.output_file}")
 
     # Get the model ready
     predictor, visualizer, extractor, cfg = pose.setup_config(
@@ -196,9 +204,36 @@ def main():
             frame = np.asarray(frame, dtype=np.float32)
             frame = frame[:, :, :]
             xy = row[["gaze x [px]", "gaze y [px]"]].to_numpy(dtype=np.int32)
+
             # Get the densepose data
-            frame, result, id_name = pose.get_densepose(
-                frame, predictor, visualizer, extractor, cfg, xy, num_processed_frames
+            if args.inference:
+                import torch
+
+                if torch.cuda.is_available() and num_processed_frames == 0:
+                    logging.info("Creating logger for inference times")
+                    starter, ender = torch.cuda.Event(
+                        enable_timing=True
+                    ), torch.cuda.Event(enable_timing=True)
+                    repetitions = 400
+                    timings = np.zeros((repetitions, 1))
+                else:
+                    error = "CUDA not available, disable inference with --no-inference"
+                    logging.error(error)
+                    raise Exception(error)
+            else:
+                starter, ender, timings = None, None, None
+
+            frame, _, id_name, starter, ender, timings = pose.get_densepose(
+                frame,
+                predictor,
+                visualizer,
+                extractor,
+                cfg,
+                xy,
+                starter,
+                ender,
+                timings,
+                frameid=num_processed_frames,
             )  # frame must be BGR
 
             # Add id_name to the dataframe
@@ -225,7 +260,11 @@ def main():
             num_processed_frames += 1
         for packet in out_video.encode(None):
             out_container.mux(packet)
-
+        if args.inference:
+            logging.info(
+                f"Mean inference time: {np.sum(timings) / repetitions } per frame"
+            )
+            logging.info(f"STD inference time: {np.std(timings)} per frame")
         # audio
         if audio_stream_available:
             logging.info("Processing audio...")
