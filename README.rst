@@ -19,3 +19,6 @@
 
 .. image:: https://img.shields.io/badge/skeleton-2022-informational
    :target: https://blog.jaraco.com/skeleton
+
+
+Check docs/description.rst for a description of arguments, and where is inference happening.
