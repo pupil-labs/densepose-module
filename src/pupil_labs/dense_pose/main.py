@@ -17,6 +17,7 @@ from pupil_labs.dynamic_content_on_rim.uitools.ui_tools import (
 from pupil_labs.dynamic_content_on_rim.video.read import get_frame, read_video_ts
 
 import pupil_labs.dense_pose.pose as pose
+import pupil_labs.dense_pose.vis as pl_dp_vis
 
 # Check if they are using a 64 bit architecture
 verbit = struct.calcsize("P") * 8
@@ -48,7 +49,7 @@ def main():
 
     parser.add_argument("--vis", action="store_true")
     parser.add_argument("--no-vis", dest="vis", action="store_false")
-    parser.set_defaults(vis=True)
+    parser.set_defaults(vis=False)
 
     parser.add_argument("--inference", action="store_true")
     parser.add_argument("--no-inference", dest="inference", action="store_false")
@@ -165,6 +166,7 @@ def main():
         args.out_csv = args.output_file.replace(
             os.path.split(args.output_file)[1], "densepose.csv"
         )
+        args.output_path = os.path.split(args.output_file)[0]
     else:
         args.output_file = os.path.join(args.output_path, "densepose.mp4")
         args.out_csv = os.path.join(args.output_path, "densepose.csv")
@@ -204,7 +206,6 @@ def main():
             frame = np.asarray(frame, dtype=np.float32)
             frame = frame[:, :, :]
             xy = row[["gaze x [px]", "gaze y [px]"]].to_numpy(dtype=np.int32)
-
             # Get the densepose data
             if args.inference and num_processed_frames == 0:
                 import torch
@@ -239,7 +240,8 @@ def main():
             # Add id_name to the dataframe
             merged_video.loc[num_processed_frames, "densepose"] = id_name
             # make a circle on the gaze
-            cv2.circle(frame, xy, 50, (0, 0, 255), 10)
+            if not np.isnan(xy).any():
+                cv2.circle(frame, xy, 50, (0, 0, 255), 10)
 
             # Finally get thje frame ready.
             out_ = cv2.normalize(frame, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
@@ -291,6 +293,9 @@ def main():
         out_container.close()
         # save the csv
         merged_video.to_csv(args.out_csv, index=False)
+        logging.info("CSV file saved at: {}".format(args.out_csv))
+        # Save the visualisation Gazemap
+        pl_dp_vis.report(merged_video, args.output_path)
         logging.info("⚡️ Misschief managed!")
 
 

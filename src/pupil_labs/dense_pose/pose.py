@@ -1,6 +1,7 @@
 import glob
 import logging
 import os
+import math
 from enum import Enum
 from typing import Dict, Type
 
@@ -35,6 +36,8 @@ from densepose.vis.extractor import (
 )
 from detectron2.config import get_cfg
 from detectron2.engine.defaults import DefaultPredictor
+
+import pupil_labs.dense_pose.vis as pl_dp_vis
 
 # Set my own logger
 logger = logging.getLogger("pl-densepose-pose")
@@ -164,24 +167,28 @@ def get_densepose(
     data = extractor(outputs)
     id_part = []
     # As of now, it checks the gaze point for labels from densepose.
-    # TODO: Take a small area around the gaze point and take the mode of the labels
-    if xy is not None and len(result["pred_boxes_XYXY"]) > 0:
-        for i, box in enumerate(result["pred_boxes_XYXY"]):
-            if xy[0] > box[0] and xy[0] < box[2] and xy[1] > box[1] and xy[1] < box[3]:
-                # Labels on a person found bounding box
-                labels_bb = result["pred_densepose"][i].labels.cpu().numpy()
-                # Gaze point relative to the bounding box
-                x = int(np.floor(xy[0] - box[0]))
-                y = int(np.floor(xy[1] - box[1]))
-                x = x - 1 if x != 0 else x
-                y = y - 1 if y != 0 else y
-                id_part.append(labels_bb[y, x])
-            else:
-                id_part.append(0)
+    if not np.isnan(xy).any() and xy is not None and len(result["pred_boxes_XYXY"]) > 0:
+        pointsCircle = getpointsCircle(xy, 50)
+        for point in pointsCircle:
+            for i, box in enumerate(result["pred_boxes_XYXY"]):
+                if (
+                    point[0] > box[0]
+                    and point[0] < box[2]
+                    and point[1] > box[1]
+                    and point[1] < box[3]
+                ):
+                    # Labels on a person found bounding box
+                    labels_bb = result["pred_densepose"][i].labels.cpu().numpy()
+                    # Gaze point relative to the bounding box
+                    x = int(np.floor(point[0] - box[0]))
+                    y = int(np.floor(point[1] - box[1]))
+                    x = x - 1 if x != 0 else x
+                    y = y - 1 if y != 0 else y
+                    id_part.append(labels_bb[y, x])
+                else:
+                    id_part.append(0)
     else:
         id_part.append(0)
-    frame = (frame * 255).astype(np.uint8)
-    frame_vis = visualizer.visualize(frame, data)
 
     # Get id name of the body part gazed at
     # Get unique ids
@@ -192,6 +199,10 @@ def get_densepose(
             id_name.append(PartsDefinition(id_part[i]).name)
     text_id_name = ", ".join(id_name)
     logging.debug(f"DensePose frame {frameid} - looking at part {text_id_name}")
+
+    # Draw segmentation
+    frame = (frame * 255).astype(np.uint8)
+    frame_vis = pl_dp_vis.vis_pose(frame, result, id_part)
 
     # write body part in the bottom left corner of the image
     if labels_onimg:
@@ -206,3 +217,13 @@ def get_densepose(
         )
 
     return frame_vis, result, text_id_name, starter, ender, timings
+
+
+def getpointsCircle(center, radius):
+    x, y = center
+    pointsCircle = []
+    for i in range(0, 360):
+        x1 = int(x + radius * math.cos(i))
+        y1 = int(y + radius * math.sin(i))
+        pointsCircle.append((x1, y1))
+    return pointsCircle
