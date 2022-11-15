@@ -15,7 +15,4 @@ except PackageNotFoundError:
 
 __all__ = ["__version__"]
 
-from . import main
-
-if __name__ == "__main__":
-    main.main()
+from . import __main__

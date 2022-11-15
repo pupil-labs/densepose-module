@@ -141,16 +141,38 @@ def report(pandas_df, out_dir):
     logos = base_body[:200, :, :]
     base_body = base_body[200:, :, :]
     base_body = cv2.applyColorMap(base_body, cv2.COLORMAP_HOT)
-    # Add a colorbar
-    colorbar = np.zeros((20, 255, 3), dtype=np.uint8)
-    for i in range(255):
-        colorbar[:, i, :] = (255 - i, 255 - i, 255 - i)
-    colorbar = cv2.applyColorMap(colorbar, cv2.COLORMAP_HOT)
-    colorbar = cv2.resize(colorbar, (base_body.shape[1], 20))
-    base_body = np.concatenate((base_body, colorbar), axis=0)
 
     # Add the logos
     gazemap = np.concatenate((logos, base_body), axis=0)
+
+    # Add a colorbar
+    margin = np.full((gazemap.shape[0], 100, 3), 255, dtype=np.uint8)
+    colorbar = np.zeros((255, 50, 3), dtype=np.uint8)
+    for i in range(255):
+        colorbar[254 - i, :, :] = (255 - i, 255 - i, 255 - i)
+    colorbar = cv2.applyColorMap(colorbar, cv2.COLORMAP_HOT)
+
+    colorbar = cv2.resize(colorbar, (20, gazemap.shape[0]))
+
+    # add values
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    fontScale = 0.5
+    fontColor = (0, 0, 0)
+    lineType = 2
+
+    step = gazemap.shape[0] / parts_count["count"].max()
+    for i in range(0, parts_count["count"].max(), 25):
+        cv2.putText(
+            margin,
+            "{}".format(parts_count["count"].max() - i),
+            (50, int(np.round(i * step))),
+            font,
+            fontScale,
+            fontColor,
+            lineType,
+        )
+    gazemap = np.concatenate((gazemap, margin), axis=1)
+    gazemap = np.concatenate((gazemap, colorbar), axis=1)
 
     # save the gazemap in rgb
     cv2.cvtColor(gazemap, cv2.COLOR_BGR2RGB)
