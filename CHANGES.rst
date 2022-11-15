@@ -1,3 +1,7 @@
+221115 -
+Small fixes. Improved report of state in Colab as no progress bar is shown.
+Improved gaze visualisation, not all human poses should be highlighted.
+
 221114 - 
 Overhaul change in the visualisation and reporting of the data
 Removed matplotlib dependency, now everything is done with OpenCV

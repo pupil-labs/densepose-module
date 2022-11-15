@@ -13,7 +13,7 @@ logging.basicConfig(
 )
 
 
-def vis_pose(frame, result, id_part, bbox=True, scores=True, parts=True):
+def vis_pose(frame, result, id_part, xy, bbox=True, scores=True, parts=True):
     """Visualize DensePose data on a frame."""
     for i, box in enumerate(result["pred_boxes_XYXY"]):
         box = np.floor(box.cpu().numpy()).astype(np.int32)
@@ -50,7 +50,13 @@ def vis_pose(frame, result, id_part, bbox=True, scores=True, parts=True):
             fg = cv2.bitwise_and(fg, fg, mask=labels_bb.astype(np.uint8))
 
             # plot gazed part in a different color
-            if id_part is not None:
+            if (
+                id_part is not None
+                and xy[0] < box[2]
+                and xy[0] > box[0]
+                and xy[1] < box[3]
+                and xy[1] > box[1]
+            ):
                 if len(id_part) == 1 and id_part[0] == 0:
                     continue
                 # remove 0 from id_part
@@ -92,6 +98,10 @@ def report(pandas_df, out_dir):
     while any(" " in s for s in parts):
         parts = [i.split(" ") for i in parts]
         parts = [item for sublist in parts for item in sublist]
+    if any(" " in s for s in parts):
+        for s in parts:
+            if s == " ":
+                parts.remove(s)
 
     # Count the number of times each part is gazed at
     parts_count = {i: parts.count(i) for i in parts}
@@ -131,7 +141,15 @@ def report(pandas_df, out_dir):
     logos = base_body[:200, :, :]
     base_body = base_body[200:, :, :]
     base_body = cv2.applyColorMap(base_body, cv2.COLORMAP_HOT)
-    # Add the logos to the bottom
+    # Add a colorbar
+    colorbar = np.zeros((20, 255, 3), dtype=np.uint8)
+    for i in range(255):
+        colorbar[:, i, :] = (255 - i, 255 - i, 255 - i)
+    colorbar = cv2.applyColorMap(colorbar, cv2.COLORMAP_HOT)
+    colorbar = cv2.resize(colorbar, (base_body.shape[1], 20))
+    base_body = np.concatenate((base_body, colorbar), axis=0)
+
+    # Add the logos
     gazemap = np.concatenate((logos, base_body), axis=0)
 
     # save the gazemap in rgb

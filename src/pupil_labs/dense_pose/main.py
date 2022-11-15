@@ -256,8 +256,12 @@ def main():
             out_frame = av.VideoFrame.from_ndarray(out_, format="rgb24")
             for packet in out_video.encode(out_frame):
                 out_container.mux(packet)
+            if num_processed_frames % 100 == 0:
+                logging.info(
+                    f"Processed {num_processed_frames} frames out of {merged_video.shape[0]}"
+                )
             progress_bar(
-                num_processed_frames, merged_video.shape[0], label="Estimating poses..."
+                num_processed_frames, merged_video.shape[0], label="Estimating poses"
             )
             num_processed_frames += 1
         for packet in out_video.encode(None):

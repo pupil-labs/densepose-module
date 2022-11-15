@@ -21,4 +21,16 @@
    :target: https://blog.jaraco.com/skeleton
 
 
+This project allows you to use DensePose from detectron2 together with a Pupil Invisible recording. 
+It will generate a new visualisation with denseposes overlaid on the video and the gaze on top.
+Will also generate a new csv file with the body parts gazed and body heatmap.
+
+To run it:
+```python
+pl-densepose 
+```
+
+You can pass the --input_path and --output_path to specify the input and output paths in the command line, alternatively a UI will be prompt to request them.
+You can also specify the --device to be used, default is cpu but you can use cuda if you have a GPU.
+
 Check docs/description.rst for a description of arguments, and where is inference happening.

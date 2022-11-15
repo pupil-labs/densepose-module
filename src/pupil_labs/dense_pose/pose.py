@@ -202,7 +202,10 @@ def get_densepose(
 
     # Draw segmentation
     frame = (frame * 255).astype(np.uint8)
-    frame_vis = pl_dp_vis.vis_pose(frame, result, id_part)
+    if not np.isnan(xy).any() and xy is not None and len(result["pred_boxes_XYXY"]) > 0:
+        frame_vis = pl_dp_vis.vis_pose(frame, result, id_part, xy)
+    else:
+        frame_vis = frame
 
     # write body part in the bottom left corner of the image
     if labels_onimg:
