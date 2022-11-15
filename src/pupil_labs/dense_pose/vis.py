@@ -1,10 +1,10 @@
 import logging
-import cv2
-import torch
-import numpy as np  #
-import pandas as pd
 import os
 from enum import Enum
+
+import cv2
+import numpy as np
+import pandas as pd
 
 # Set my own logger
 logger = logging.getLogger("pl-densepose-vis")
@@ -98,9 +98,9 @@ def report(pandas_df, out_dir):
     while any(" " in s for s in parts):
         parts = [i.split(" ") for i in parts]
         parts = [item for sublist in parts for item in sublist]
-    if any(" " in s for s in parts):
+    if any("" in s for s in parts):
         for s in parts:
-            if s == " ":
+            if s == "":
                 parts.remove(s)
 
     # Count the number of times each part is gazed at
