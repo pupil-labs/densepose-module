@@ -14,5 +14,3 @@ except PackageNotFoundError:
     pass
 
 __all__ = ["__version__"]
-
-from . import __main__
