@@ -29,7 +29,7 @@ To install it:
 
 ..  code-block:: python
 
-    pip install pupil-labs-dense-pose
+    python -m pip install 'git+https://github.com/pupil-labs/densepose-module.git'
 
 To run it:
 
