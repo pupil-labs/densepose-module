@@ -1,7 +1,7 @@
 import glob
 import logging
-import os
 import math
+import os
 from enum import Enum
 from typing import Dict, Type
 
@@ -38,12 +38,6 @@ from detectron2.config import get_cfg
 from detectron2.engine.defaults import DefaultPredictor
 
 import pupil_labs.dense_pose.vis as pl_dp_vis
-
-# Set my own logger
-logger = logging.getLogger("pl-densepose-pose")
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
 
 
 class PartsDefinition(Enum):
@@ -136,6 +130,8 @@ def get_densepose(
     ender=None,
     timings=0,
     frameid=0,
+    progress_bar=None,
+    poses_task=None,
     labels_onimg=True,
 ):
     with torch.no_grad():
@@ -168,6 +164,12 @@ def get_densepose(
     id_part = []
     # As of now, it checks the gaze point for labels from densepose.
     if not np.isnan(xy).any() and xy is not None and len(result["pred_boxes_XYXY"]) > 0:
+        if progress_bar is not None and poses_task is not None:
+            progress_bar.reset(
+                poses_task,
+                total=len(result["pred_boxes_XYXY"]),
+                description=f"🤸‍♀️ Estimating poses at frame:{frameid}",
+            )
         pointsCircle = getpointsCircle(xy, 50)
         for point in pointsCircle:
             for i, box in enumerate(result["pred_boxes_XYXY"]):
@@ -187,9 +189,10 @@ def get_densepose(
                     id_part.append(labels_bb[y, x])
                 else:
                     id_part.append(0)
+                if progress_bar is not None and poses_task is not None:
+                    progress_bar.advance(poses_task)
     else:
         id_part.append(0)
-
     # Get id name of the body part gazed at
     # Get unique ids
     id_part = list(set(id_part))
@@ -218,8 +221,7 @@ def get_densepose(
             (255, 255, 255),
             lineType=1,
         )
-
-    return frame_vis, result, text_id_name, starter, ender, timings
+    return frame_vis, result, text_id_name, starter, ender, timings, poses_task
 
 
 def getpointsCircle(center, radius):

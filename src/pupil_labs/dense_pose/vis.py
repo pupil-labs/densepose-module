@@ -6,12 +6,6 @@ import cv2
 import numpy as np
 import pandas as pd
 
-# Set my own logger
-logger = logging.getLogger("pl-densepose-vis")
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
-
 
 def vis_pose(frame, result, id_part, xy, bbox=True, scores=True, parts=True):
     """Visualize DensePose data on a frame."""
