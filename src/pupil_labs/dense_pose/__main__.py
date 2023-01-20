@@ -154,7 +154,7 @@ def main():
         }
     )
     if audio_stream_available:
-        audio_ts = audio_ts + world_timestamps_df["timestamp [ns]"][0]
+        audio_ts = audio_ts + ts[0]
         audio_df = pd.DataFrame(
             {
                 "frames": np.arange(audio_frames),
