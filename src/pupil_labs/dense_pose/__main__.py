@@ -67,7 +67,7 @@ def main():
     )
     if args.override:
         logging.info(
-            "[white bold on red]⚠️ Running in override mode, this is not officially supported[/]",
+            "[white bold on red]⚠️  Running in override mode, this is not officially supported  ⚠️[/]",
             extra={"markup": True},
         )
     logging.info(f"Arguments: {args}")
