@@ -46,12 +46,10 @@ def main():
     parser.add_argument("--confidence", default=0.7, type=float)
     parser.add_argument("--device", default="cpu", type=str)
 
-    parser.add_argument("--vis", action="store_true")
-    parser.add_argument("--no-vis", dest="vis", action="store_false")
+    parser.add_argument("-p", "--vis", action="store_true")
     parser.set_defaults(vis=False)
 
-    parser.add_argument("--inference", action="store_true")
-    parser.add_argument("--no-inference", dest="inference", action="store_false")
+    parser.add_argument("-f", "--inference", action="store_true")
     parser.set_defaults(inference=False)
 
     parser.add_argument("-o", "--override", action="store_true")
@@ -143,7 +141,7 @@ def main():
             axis=1,
             inplace=True,
         )
-        gaze_df["timestamp [ns]"].apply(lambda x: x * 1e9)
+        gaze_df["timestamp [ns]"] = gaze_df["timestamp [ns]"].map(lambda x: x * 1e9)
         ts = ts * 1e9
 
     video_df = pd.DataFrame(
@@ -213,8 +211,12 @@ def main():
 
     if args.override:
         logging.info("Geting gaze coordinates on image from normalized coordinates")
-        merged_video["gaze x [px]"].apply(lambda x: x * vid_frame.width)
-        merged_video["gaze y [px]"].apply(lambda x: x * vid_frame.height)
+        merged_video["gaze x [px]"] = merged_video["gaze x [px]"].map(
+            lambda x: x * vid_frame.width
+        )
+        merged_video["gaze y [px]"] = merged_video["gaze y [px]"].map(
+            lambda y: (1 - y) * vid_frame.height
+        )
 
     # Get the output path
     if args.output_path is None:
@@ -316,7 +318,7 @@ def main():
                 if not np.isnan(xy).any():
                     cv2.circle(frame, xy, 50, (0, 0, 255), 10)
 
-                # Finally get thje frame ready.
+                # Finally get the frame ready.
                 out_ = cv2.normalize(frame, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
 
                 if args.vis:
