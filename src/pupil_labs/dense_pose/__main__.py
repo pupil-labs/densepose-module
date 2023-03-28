@@ -336,8 +336,9 @@ def main():
                         f"Processed {num_processed_frames} frames out of {merged_video.shape[0]}"
                     )
                 progress_bar.advance(video_task)
+                progress_bar.refresh()
                 num_processed_frames += 1
-                progress_bar.stop_task(video_task)
+            progress_bar.stop_task(video_task)
             for packet in out_video.encode(None):
                 out_container.mux(packet)
             if args.inference:
@@ -365,6 +366,7 @@ def main():
                     out_container.mux(af)
                     num_processed_frames += 1
                     progress_bar.advance(audio_task)
+                    progress_bar.refresh()
                 progress_bar.stop_task(audio_task)
                 for packet in out_audio.encode(None):
                     out_container.mux(packet)
