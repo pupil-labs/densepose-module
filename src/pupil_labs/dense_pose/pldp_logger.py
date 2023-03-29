@@ -2,13 +2,13 @@ import logging
 
 from rich.logging import RichHandler
 
-logger = logging.getLogger("pl-densepose")
 logging.basicConfig(
     format="%(message)s",
     datefmt="[%X]",
     level=logging.INFO,
     handlers=[RichHandler()],
 )
+logger = logging.getLogger("pl-densepose")
 logger.addHandler(logging.StreamHandler())
 
 
