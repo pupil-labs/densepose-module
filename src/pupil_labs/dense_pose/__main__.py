@@ -17,13 +17,13 @@ from rich.progress import Progress
 import pupil_labs.dense_pose.pose as pose
 import pupil_labs.dense_pose.vis as pl_dp_vis
 
-logger = logging.getLogger()
 logging.basicConfig(
     format="%(message)s",
     datefmt="[%X]",
     level=logging.INFO,
     handlers=[RichHandler()],
 )
+logger = logging.getLogger()
 
 # Check if they are using a 64 bit architecture
 verbit = struct.calcsize("P") * 8
