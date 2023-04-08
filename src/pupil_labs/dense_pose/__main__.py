@@ -16,6 +16,7 @@ from rich.progress import Progress
 
 import pupil_labs.dense_pose.pose as pose
 import pupil_labs.dense_pose.vis as pl_dp_vis
+from pupil_labs.dense_pose.parser import init_parser
 
 logging.basicConfig(
     format="%(message)s",
@@ -36,25 +37,7 @@ if verbit != 64:
 def main(args=None):
     if args is None:
         # Parse arguments
-        parser = argparse.ArgumentParser(description="Pupil Labs - Dense Pose")
-        parser.add_argument("--input_path", default=None, type=str)
-        parser.add_argument("--output_path", default=None, type=str)
-        parser.add_argument("--start", default="recording.begin", type=str)
-        parser.add_argument("--end", default="recording.end", type=str)
-        parser.add_argument(
-            "--model", default="DensePose_ResNet101_FPN_s1x-e2e.pkl", type=str
-        )
-        parser.add_argument("--confidence", default=0.7, type=float)
-        parser.add_argument("--device", default="cpu", type=str)
-
-        parser.add_argument("-p", "--vis", action="store_true")
-        parser.set_defaults(vis=False)
-
-        parser.add_argument("-f", "--inference", action="store_true")
-        parser.set_defaults(inference=False)
-
-        parser.add_argument("-o", "--override", action="store_true")
-        parser.set_defaults(override=False)
+        parser = init_parser()
         args = parser.parse_args()
     logging.info(
         "[white bold on #0d122a]◎ DensePose Module by Pupil Labs[/]",
@@ -144,6 +127,15 @@ def main(args=None):
         )
         gaze_df["timestamp [ns]"] = gaze_df["timestamp [ns]"].map(lambda x: x * 1e9)
         ts = ts * 1e9
+        events_df.rename(
+            {
+                "timestamp": "timestamp [ns]",
+                "label": "name",
+            },
+            axis=1,
+            inplace=True,
+        )
+        events_df["timestamp [ns]"] = events_df["timestamp [ns]"].map(lambda x: x * 1e9)
 
     video_df = pd.DataFrame(
         {
@@ -315,6 +307,15 @@ def main(args=None):
 
                 # Add id_name to the dataframe
                 merged_video.loc[num_processed_frames, "densepose"] = id_name
+                # Add the closest annotation
+                current_ts = row["timestamp [ns]"]
+                # Find the closest event name using the timestamp
+                closest_event = events_df.iloc[
+                    (events_df["timestamp [ns]"] - current_ts).abs().argsort()[:1]
+                ]
+                merged_video.loc[
+                    num_processed_frames, "closest_annotation"
+                ] = closest_event["name"].values[0]
                 # make a circle on the gaze
                 if not np.isnan(xy).any():
                     cv2.circle(frame, xy, 50, (0, 0, 255), 10)
