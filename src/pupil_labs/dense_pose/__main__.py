@@ -300,6 +300,7 @@ def main(args=None):
                     starter,
                     ender,
                     timings,
+                    args.circle_size,
                     frameid=num_processed_frames,
                     progress_bar=progress_bar,
                     poses_task=poses_task,
@@ -318,7 +319,7 @@ def main(args=None):
                 ] = closest_event["name"].values[0]
                 # make a circle on the gaze
                 if not np.isnan(xy).any():
-                    cv2.circle(frame, xy, 50, (0, 0, 255), 10)
+                    cv2.circle(frame, xy, args.circle_size, (0, 0, 255), 10)
 
                 # Finally get the frame ready.
                 out_ = cv2.normalize(frame, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
