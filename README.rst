@@ -20,24 +20,148 @@
 .. image:: https://img.shields.io/badge/skeleton-2022-informational
    :target: https://blog.jaraco.com/skeleton
 
+Introduction
+============
 
-This project allows you to use DensePose from detectron2 together with a Pupil Invisible recording.
-It will generate a new visualisation with denseposes overlaid on the video and the gaze on top.
-Will also generate a new csv file with the body parts gazed and body heatmap.
+This project allows you to use DensePose from detectron2 together with Pupil Invisible / Neon's recordings.
+It generates a new visualization with denseposes overlaid on the video and gaze on top, and also generates a new CSV file with the body parts gazed and body heatmap.
 
-To install it:
+Requirements
+============
+You should have, Linux or MacOS and Python 3.8 or higher installed on your system.
+This file assumes a minimum technical knowledge of the command line and Python, if you are not familiar we recommend that you use our Google Colab notebook instead.
 
-..  code-block:: python
+.. image:: https://img.shields.io/static/v1?label=&message=Open%20in%20Google%20Colab&color=blue&labelColor=grey&logo=Google%20Colab&logoColor=#F9AB00
+   :target: https://colab.research.google.com/drive/1s6mBNAhcnxhJlqxeaQ2IZMk_Ca381p25#forceEdit=true&sandboxMode=true
 
-    python -m pip install 'git+https://github.com/pupil-labs/densepose-module.git'
+Installation
+============
 
-To run it:
+Follow these steps to install and use the `pupil-labs-dense-pose` module:
 
-..  code-block:: python
+On MacOS (using the CPU)
 
-    pl-densepose
+1. Open a terminal window.
 
-You can pass the --input_path and --output_path to specify the input and output paths in the command line, alternatively a UI will be prompt to request them.
-You can also specify the --device to be used, default is cpu but you can use cuda if you have a GPU.
+2. Run the following commands (change the python version to the one you have installed):
 
-Check docs/description.rst for a description of arguments, and where is inference happening.
+MacOS (Python 3.11)
+-------------------
+In MacOS we can only use the CPU version of detectron2, when installing it from Meta's repository there are some issues that you may find. So we will use @johnnynunez's version of detectron2 that works with the latest pytorch version.
+
+.. code-block:: bash
+
+      # Optional, but recommended, run it on a virtual environment
+      python3.11 -m venv venv
+      source venv/bin/activate
+      pip install -U pip setuptools
+      
+      # Install torch and torchvision
+      pip install torch==2.0.1 torchvision==0.15.2
+
+      # Now, we install detectron2, Meta hasn't update it to run with the latest pytorch version, but thanks to @johnnynunez
+      # we have a version that works with the latest. Grab the wheels for your version at https://github.com/johnnynunez/detectron2/actions/runs/5953527699
+      # and install them with pip, you will need to point to the wheel you downloaded, e.g.:
+
+      pip install detectron2-0.7-cp311-cp311-macosx_10_9_universal2.whl
+
+      # This will also avoid issues with poetry from python, giving you errors with torch module not being found even though it is installed.
+      # Now, we install densepose
+
+      export FORCE_CUDA="0" # as we don't have CUDA
+      pip install git+https://github.com/johnnynunez/detectron2@main#subdirectory=projects/DensePose
+
+      # Now we install the module
+      python -m pip install 'git+https://github.com/pupil-labs/densepose-module.git'
+      # And that's it!
+
+Linux (Python 3.11)
+-------------------
+On Linux we can either run inference on the CPU or the GPU (if we have CUDA installed). If you want to run it on the CPU, follow these steps:
+
+CPU:
+----
+
+.. code-block:: bash
+
+      # Optional, but recommended, run it on a virtual environment
+      python3.11 -m venv venv
+      source venv/bin/activate
+      pip install -U pip setuptools
+      
+      # Install torch and torchvision
+      pip install torch==2.0.1 torchvision==0.15.2
+
+      # Now, we install detectron2, Meta hasn't update it to run with the latest pytorch version, but thanks to @johnnynunez
+      # we have a version that works with the latest. Grab the wheels for your version at https://github.com/johnnynunez/detectron2/actions/runs/5953527699
+      # and install them with pip, you will need to point to the wheel you downloaded, e.g.:
+
+      pip install detectron2-3.11-pytorch2.0.1-ubuntu-latest-wheel.whl
+
+      export FORCE_CUDA="0" # as we don't have CUDA
+      pip install git+https://github.com/johnnynunez/detectron2@main#subdirectory=projects/DensePose
+
+      # Now we install the module
+      python -m pip install 'git+https://github.com/pupil-labs/densepose-module.git'
+      # And that's it!
+
+GPU:
+----
+
+.. code-block:: bash
+
+      # Optional, but recommended, run it on a virtual environment
+      python3.11 -m venv venv
+      source venv/bin/activate
+      pip install -U pip setuptools
+      
+      # Install torch and torchvision
+      pip3 install torch+cu torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+      # Now, we install detectron2, Meta hasn't update to run with the latest pytorch version, but thanks to @johnnynunez
+      # we have a version that works with the latest. There are wheels for cuda 11.8 and pytorch 2.01 at 
+      #(https://app.circleci.com/pipelines/github/facebookresearch/detectron2/2924/workflows/9f85ee27-173e-494c-b699-8ceb110a3398/jobs/14336/artifacts)
+      # if you use a different version you will need to build it yourself.
+
+      pip install detectron2-0.7-cp311-cp311-linux_x86_64.whl
+      #or to try building your own wheels:
+      pip install git+https://github.com/johnnynunez/detectron2.git
+
+      export FORCE_CUDA="1" # as we want to use CUDA
+      # We might also need to specify the CUDA home directory
+      # like export CUDA_HOME="/usr/local/cuda-11.8"
+
+      pip install git+https://github.com/johnnynunez/detectron2@main#subdirectory=projects/DensePose
+
+      # Now we install the module
+      python -m pip install 'git+https://github.com/pupil-labs/densepose-module.git'
+      # And that's it!
+
+
+Running the Module
+==================
+
+To run the `pupil-labs-dense-pose` module, execute the following command:
+
+.. code-block:: bash
+
+   pl-densepose
+
+
+Checking the arguments
+----------------------
+
+.. code-block:: bash
+
+   pl-densepose -h
+
+
+Arguments
+=========
+
+You can also provide additional options while running the command. For example, to specify the input and output paths, use the `--input_path` and `--output_path` options. Additionally, you can use the `--device` option to specify the device to be used (e.g., `cpu` or `cuda` for GPU).
+Or the size of the gaze circle used to determine the gazed parts.
+
+For a detailed description of available arguments and information about where inference is happening, refer to the `docs/description.rst` file.
+
+Feel free to reach out if you have any questions or need further assistance.
