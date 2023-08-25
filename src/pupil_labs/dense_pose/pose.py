@@ -129,6 +129,7 @@ def get_densepose(
     starter=None,
     ender=None,
     timings=0,
+    circle_size=50,
     frameid=0,
     progress_bar=None,
     poses_task=None,
@@ -170,7 +171,7 @@ def get_densepose(
                 total=len(result["pred_boxes_XYXY"]),
                 description=f"🤸‍♀️ Estimating poses at frame:{frameid}",
             )
-        pointsCircle = getpointsCircle(xy, 50)
+        pointsCircle = getpointsCircle(xy, circle_size)
         for point in pointsCircle:
             for i, box in enumerate(result["pred_boxes_XYXY"]):
                 if (
