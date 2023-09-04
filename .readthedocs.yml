@@ -10,6 +10,3 @@ python:
   - path: .
     extra_requirements:
       - docs
-      - sphinx
-      - rst.linker
-      - jaraco.packaging
