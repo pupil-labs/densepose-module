@@ -33,3 +33,9 @@ extensions += ["sphinx.ext.intersphinx"]
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
 }
+html_theme = "furo"
+autosummary_generate = True
+
+
+github_username = "pupil-labs"
+github_repository = "pupil_labs_dense_pose"
