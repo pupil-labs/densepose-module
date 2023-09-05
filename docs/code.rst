@@ -26,7 +26,7 @@ These are passed back to main.
 
 .. literalinclude:: ../src/pupil_labs/dense_pose/__main__.py
    :language: python
-   :emphasize-lines: 226-229
+   :lines: 226-229
    :linenos:
 
 Finally, ``get_densepose`` is the main call that will run the densepose on the video.
@@ -36,14 +36,14 @@ The results are a DensePoseChart and PredictionBoxes.
 
 .. literalinclude:: ../src/pupil_labs/dense_pose/pose.py
    :language: python
-   :emphasize-lines: 122-225
+   :lines: 122-225
    :linenos:
 
 This is called at __main__ here:
 
 .. literalinclude:: ../src/pupil_labs/dense_pose/__main__.py
    :language: python
-   :emphasize-lines: 285-307
+   :lines: 285-307
    :linenos:
 
 and the predictor, visualizer, config are passed along with the frame, circle_size, and gaze coordinates.
@@ -62,7 +62,7 @@ A function to visualize the densepose parts, onto video frame.
 
 .. literalinclude:: ../src/pupil_labs/dense_pose/vis.py
    :language: python
-   :emphasize-lines: 10-78
+   :lines: 10-78
    :linenos:
 
 report
@@ -71,5 +71,5 @@ Generate a plot and csv file with parts count.
 
 .. literalinclude:: ../src/pupil_labs/dense_pose/vis.py
    :language: python
-   :emphasize-lines: 81-174
+   :lines: 81-174
    :linenos:
