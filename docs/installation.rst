@@ -1,9 +1,20 @@
+.. _installation:
+
+*************
 Installation
-============
+*************
+
+Below, you'll find instructions on how to install this module/package on your local machine. 
+Please note that these instructions may be subject to modifications, and they are provided without any guarantees. 
+
+The latest version have been successfully tested with a Python environment running version 3.11 and PyTorch 2.0.
+
+.. warning:: ⚠️ Windows OS Not Supported
+
+   This package does ``not currently support Windows``, you might be able to run it but it is not tested, and per `detectron2's installation guidelines <https://detectron2.readthedocs.io/en/latest/tutorials/install.html>`_ , Windows is not officially supported.
+
 
 Follow these steps to install and use the `pupil-labs-dense-pose` module:
-
-On MacOS (using the CPU)
 
 1. Open a terminal window.
 
@@ -100,3 +111,5 @@ GPU:
       # Now we install the module
       python -m pip install 'git+https://github.com/pupil-labs/densepose-module.git'
       # And that's it!
+
+After is installed properly, you should see a new package  :py:mod:`pupil_labs.dense_pose`.
