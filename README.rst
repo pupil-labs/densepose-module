@@ -162,6 +162,6 @@ Arguments
 You can also provide additional options while running the command. For example, to specify the input and output paths, use the `--input_path` and `--output_path` options. Additionally, you can use the `--device` option to specify the device to be used (e.g., `cpu` or `cuda` for GPU).
 Or the size of the gaze circle used to determine the gazed parts.
 
-For a detailed description of available arguments and information about where inference is happening, refer to the `docs/description.rst` file.
+For a detailed description of available arguments and information about where inference is happening, refer to the `docs <http://densepose-module.readthedocs.io/>`_ or our `alpha lab article <https://docs-staging.pupil-labs.com/alpha-lab/dense-pose/>`_
 
 Feel free to reach out if you have any questions or need further assistance.
