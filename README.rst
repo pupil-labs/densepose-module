@@ -54,30 +54,31 @@ In MacOS we can only use the CPU version of detectron2, when installing it from 
       # Optional, but recommended, run it on a virtual environment
       python3.11 -m venv venv
       source venv/bin/activate
-      pip install -U pip setuptools
+      pip install -U pip setuptools wheel
       
       # Install torch and torchvision
       pip install torch==2.0.1 torchvision==0.15.2
 
-      # Now, we install detectron2, Meta hasn't update it to run with the latest pytorch version, but thanks to @johnnynunez
-      # we have a version that works with the latest. Grab the wheels for your version at https://github.com/johnnynunez/detectron2/actions/runs/5953527699
-      # and install them with pip, you will need to point to the wheel you downloaded, e.g.:
+      # Now, we install detectron2, Meta hasn't updated it to run with the latest Pytorch version, but thanks to @johnnynunez
+      # we have a version that works with the latest. Grab the wheels for your version at https://github.com/johnnynunez/detectron2/actions/workflows/build-wheels.yml
+      # select the latest run for your system and matching Pytorch.
+      # Install them with pip, you will need to point to the wheel you downloaded, e.g.:
 
       pip install detectron2-0.7-cp311-cp311-macosx_10_9_universal2.whl
 
-      # This will also avoid issues with poetry from python, giving you errors with torch module not being found even though it is installed.
+      # This will also avoid issues with poetry from Python, giving you errors with the torch module not being found even though it is installed.
       # Now, we install densepose
 
       export FORCE_CUDA="0" # as we don't have CUDA
       pip install git+https://github.com/johnnynunez/detectron2@main#subdirectory=projects/DensePose
 
       # Now we install the module
-      python -m pip install 'git+https://github.com/pupil-labs/densepose-module.git'
+      pip install git+https://github.com/pupil-labs/densepose-module
       # And that's it!
 
 Linux (Python 3.11)
 -------------------
-On Linux we can either run inference on the CPU or the GPU (if we have CUDA installed). If you want to run it on the CPU, follow these steps:
+On Linux, we can run inference on either the CPU or the GPU (if we have CUDA installed). If you want to run it on the CPU, follow these steps:
 
 CPU:
 ----
@@ -87,13 +88,13 @@ CPU:
       # Optional, but recommended, run it on a virtual environment
       python3.11 -m venv venv
       source venv/bin/activate
-      pip install -U pip setuptools
+      pip install -U pip setuptools wheel
       
       # Install torch and torchvision
       pip install torch==2.0.1 torchvision==0.15.2
 
       # Now, we install detectron2, Meta hasn't update it to run with the latest pytorch version, but thanks to @johnnynunez
-      # we have a version that works with the latest. Grab the wheels for your version at https://github.com/johnnynunez/detectron2/actions/runs/5953527699
+      # we have a version that works with the latest. Grab the wheels for your version at https://github.com/johnnynunez/detectron2/actions/workflows/build-wheels.yml
       # and install them with pip, you will need to point to the wheel you downloaded, e.g.:
 
       pip install detectron2-3.11-pytorch2.0.1-ubuntu-latest-wheel.whl
@@ -102,7 +103,7 @@ CPU:
       pip install git+https://github.com/johnnynunez/detectron2@main#subdirectory=projects/DensePose
 
       # Now we install the module
-      python -m pip install 'git+https://github.com/pupil-labs/densepose-module.git'
+      pip install git+https://github.com/pupil-labs/densepose-module.git
       # And that's it!
 
 GPU:
@@ -113,7 +114,7 @@ GPU:
       # Optional, but recommended, run it on a virtual environment
       python3.11 -m venv venv
       source venv/bin/activate
-      pip install -U pip setuptools
+      pip install -U pip setuptools wheel
       
       # Install torch and torchvision
       pip3 install torch+cu torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
@@ -134,7 +135,7 @@ GPU:
       pip install git+https://github.com/johnnynunez/detectron2@main#subdirectory=projects/DensePose
 
       # Now we install the module
-      python -m pip install 'git+https://github.com/pupil-labs/densepose-module.git'
+      pip install git+https://github.com/pupil-labs/densepose-module
       # And that's it!
 
 
