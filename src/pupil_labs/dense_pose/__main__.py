@@ -1,4 +1,3 @@
-import argparse
 import glob
 import logging
 import os
@@ -9,14 +8,13 @@ import av
 import cv2
 import numpy as np
 import pandas as pd
+import pupil_labs.dense_pose.pose as pose
+import pupil_labs.dense_pose.vis as pl_dp_vis
+from pupil_labs.dense_pose.parser import init_parser
 from pupil_labs.dynamic_content_on_rim.uitools.ui_tools import get_path, get_savedir
 from pupil_labs.dynamic_content_on_rim.video.read import get_frame, read_video_ts
 from rich.logging import RichHandler
 from rich.progress import Progress
-
-import pupil_labs.dense_pose.pose as pose
-import pupil_labs.dense_pose.vis as pl_dp_vis
-from pupil_labs.dense_pose.parser import init_parser
 
 logging.basicConfig(
     format="%(message)s",
@@ -227,6 +225,7 @@ def main(args=None):
     predictor, visualizer, extractor, cfg = pose.setup_config(
         args.confidence, args.device
     )
+    merged_video = merged_video.reset_index(drop=True, inplace=False)
 
     # Here we go!
     with av.open(video_path) as video, av.open(video_path) as audio, av.open(
@@ -249,7 +248,7 @@ def main(args=None):
             video_task = progress_bar.add_task(
                 "📹 Processing video", total=merged_video.shape[0]
             )
-            poses_task = progress_bar.add_task(f"🤸‍♀️ Estimating poses")
+            poses_task = progress_bar.add_task("🤸‍♀️ Estimating poses")
             while num_processed_frames < merged_video.shape[0]:
                 row = merged_video.iloc[num_processed_frames]
                 # Get the frame
@@ -268,9 +267,10 @@ def main(args=None):
 
                     if torch.cuda.is_available():
                         logging.info("Creating logger for inference times")
-                        starter, ender = torch.cuda.Event(
-                            enable_timing=True
-                        ), torch.cuda.Event(enable_timing=True)
+                        starter, ender = (
+                            torch.cuda.Event(enable_timing=True),
+                            torch.cuda.Event(enable_timing=True),
+                        )
                         repetitions = 400
                         timings = np.zeros((repetitions, 1))
                     else:
@@ -314,9 +314,9 @@ def main(args=None):
                 closest_event = events_df.iloc[
                     (events_df["timestamp [ns]"] - current_ts).abs().argsort()[:1]
                 ]
-                merged_video.loc[
-                    num_processed_frames, "closest_annotation"
-                ] = closest_event["name"].values[0]
+                merged_video.loc[num_processed_frames, "closest_annotation"] = (
+                    closest_event["name"].values[0]
+                )
                 # make a circle on the gaze
                 if not np.isnan(xy).any():
                     cv2.circle(frame, xy, args.circle_size, (0, 0, 255), 10)
