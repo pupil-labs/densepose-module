@@ -1,14 +1,3 @@
-.. image:: https://img.shields.io/pypi/v/pupil-labs-dense-pose.svg
-   :target: `PyPI link`_
-
-.. image:: https://img.shields.io/pypi/pyversions/pupil-labs-dense-pose.svg
-   :target: `PyPI link`_
-
-.. _PyPI link: https://pypi.org/project/pupil-labs-dense-pose
-
-.. image:: https://github.com/pupil-labs/densepose-module/workflows/tests/badge.svg
-   :target: https://github.com/pupil-labs/densepose-module/actions?query=workflow%3A%22tests%22
-   :alt: tests
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
@@ -28,7 +17,7 @@ It generates a new visualization with denseposes overlaid on the video and gaze 
 
 Requirements
 ============
-You should have, Linux or MacOS and Python 3.8 or higher installed on your system.
+You should have, Linux or MacOS and Python 3.9 or higher installed on your system.
 This file assumes a minimum technical knowledge of the command line and Python, if you are not familiar we recommend that you use our Google Colab notebook instead.
 
 .. image:: https://img.shields.io/static/v1?label=&message=Open%20in%20Google%20Colab&color=blue&labelColor=grey&logo=Google%20Colab&logoColor=#F9AB00
@@ -43,7 +32,11 @@ On MacOS (using the CPU)
 
 1. Open a terminal window.
 
-2. Run the following commands (change the python version to the one you have installed):
+2. Run the following commands. For easiness, we will use the astral/uv package manager. You can install it in your system by:
+
+.. code-block:: bash
+
+    curl -LsSf https://astral.sh/uv/install.sh | sh
 
 MacOS (Python 3.11)
 -------------------
@@ -52,28 +45,28 @@ In MacOS we can only use the CPU version of detectron2, when installing it from 
 .. code-block:: bash
 
       # Optional, but recommended, run it on a virtual environment
-      python3.11 -m venv venv
-      source venv/bin/activate
-      pip install -U pip setuptools wheel
+      uv venv --seed --python python3.11 --exclude-newer="2024-03-14"
+      source .venv/bin/activate
+      uv pip install -U pip setuptools wheel
       
       # Install torch and torchvision
-      pip install torch==2.0.1 torchvision==0.15.2
+      uv pip install torch==2.0.1 torchvision==0.15.2
 
       # Now, we install detectron2, Meta hasn't updated it to run with the latest Pytorch version, but thanks to @johnnynunez
       # we have a version that works with the latest. Grab the wheels for your version at https://github.com/johnnynunez/detectron2/actions/workflows/build-wheels.yml
       # select the latest run for your system and matching Pytorch.
       # Install them with pip, you will need to point to the wheel you downloaded, e.g.:
 
-      pip install detectron2-0.7-cp311-cp311-macosx_10_9_universal2.whl
+      uv pip install detectron2-0.7-cp311-cp311-macosx_10_9_universal2.whl
 
       # This will also avoid issues with poetry from Python, giving you errors with the torch module not being found even though it is installed.
       # Now, we install densepose
 
       export FORCE_CUDA="0" # as we don't have CUDA
-      pip install git+https://github.com/johnnynunez/detectron2@main#subdirectory=projects/DensePose
+      uv pip install git+https://github.com/johnnynunez/detectron2@main#subdirectory=projects/DensePose --no-build-isolation --exclude-newer="2024-03-14"
 
       # Now we install the module
-      pip install git+https://github.com/pupil-labs/densepose-module
+      uv pip install git+https://github.com/pupil-labs/densepose-module --exclude-newer="2024-03-14"
       # And that's it!
 
 Linux (Python 3.11)
@@ -86,24 +79,24 @@ CPU:
 .. code-block:: bash
 
       # Optional, but recommended, run it on a virtual environment
-      python3.11 -m venv venv
-      source venv/bin/activate
-      pip install -U pip setuptools wheel
+      uv venv --seed --python python3.11 --exclude-newer="2024-03-14"
+      source .venv/bin/activate
+      uv pip install -U pip setuptools wheel
       
       # Install torch and torchvision
-      pip install torch==2.0.1 torchvision==0.15.2
+      uv pip install torch==2.0.1 torchvision==0.15.2
 
       # Now, we install detectron2, Meta hasn't update it to run with the latest pytorch version, but thanks to @johnnynunez
       # we have a version that works with the latest. Grab the wheels for your version at https://github.com/johnnynunez/detectron2/actions/workflows/build-wheels.yml
       # and install them with pip, you will need to point to the wheel you downloaded, e.g.:
 
-      pip install detectron2-3.11-pytorch2.0.1-ubuntu-latest-wheel.whl
+      uv pip install detectron2-3.11-pytorch2.0.1-ubuntu-latest-wheel.whl
 
       export FORCE_CUDA="0" # as we don't have CUDA
-      pip install git+https://github.com/johnnynunez/detectron2@main#subdirectory=projects/DensePose
+      uv pip install git+https://github.com/johnnynunez/detectron2@main#subdirectory=projects/DensePose --no-build-isolation --exclude-newer="2024-03-14"
 
       # Now we install the module
-      pip install git+https://github.com/pupil-labs/densepose-module.git
+      uv pip install git+https://github.com/pupil-labs/densepose-module.git --exclude-newer="2024-03-14"
       # And that's it!
 
 GPU:
@@ -112,30 +105,30 @@ GPU:
 .. code-block:: bash
 
       # Optional, but recommended, run it on a virtual environment
-      python3.11 -m venv venv
-      source venv/bin/activate
-      pip install -U pip setuptools wheel
+      uv venv --seed --python python3.11 --exclude-newer="2024-03-14"
+      source .venv/bin/activate
+      uv pip install -U pip setuptools wheel
       
       # Install torch and torchvision
-      pip3 install torch+cu torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+      uv pip install torch+cu torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
       # Now, we install detectron2, Meta hasn't update to run with the latest pytorch version, but thanks to @johnnynunez
       # we have a version that works with the latest. There are wheels for cuda 11.8 and pytorch 2.01 at 
       #(https://app.circleci.com/pipelines/github/facebookresearch/detectron2/2924/workflows/9f85ee27-173e-494c-b699-8ceb110a3398/jobs/14336/artifacts)
       # if you use a different version you will need to build it yourself.
 
-      pip install detectron2-0.7-cp311-cp311-linux_x86_64.whl
+      uv pip install detectron2-0.7-cp311-cp311-linux_x86_64.whl
       #or to try building your own wheels:
-      pip install git+https://github.com/johnnynunez/detectron2.git
+      uv pip install git+https://github.com/johnnynunez/detectron2.git --exclude-newer="2024-03-14"
 
       export FORCE_CUDA="1" # as we want to use CUDA
       # We might also need to specify the CUDA home directory
       # like export CUDA_HOME="/usr/local/cuda-11.8"
 
-      pip install git+https://github.com/johnnynunez/detectron2@main#subdirectory=projects/DensePose
+      uv pip install git+https://github.com/johnnynunez/detectron2@main#subdirectory=projects/DensePose --no-build-isolation --exclude-newer="2024-03-14"
 
       # Now we install the module
-      pip install git+https://github.com/pupil-labs/densepose-module
+      uv pip install git+https://github.com/pupil-labs/densepose-module --exclude-newer="2024-03-14"
       # And that's it!
 
 
